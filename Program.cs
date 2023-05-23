@@ -12,7 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(opt =>
 {
-    opt.SwaggerDoc("v1", new OpenApiInfo { Title = "EMSAPI", Version = "v1" });
+    opt.SwaggerDoc("v1", new OpenApiInfo { Title = "SMSAPI", Version = "v1" });
     opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -73,7 +73,18 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy(
+        name: MyAllowSpecificOrigins, policy =>
+        {
+            policy.WithOrigins("https://localhost:7076", "http://localhost:5216")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+        }
+   );
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -82,11 +93,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCors(MyAllowSpecificOrigins);
 app.UseHttpsRedirection();
 app.UseMiddleware<ApiKeyAuthMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 
